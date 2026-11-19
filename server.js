@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const authorsRoutes = require('./routes/authors');
+const postsRoutes = require('./routes/posts');
 
 const PORT = 3000;
 
@@ -11,6 +12,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/authors', authorsRoutes);
+app.use('/posts', postsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
