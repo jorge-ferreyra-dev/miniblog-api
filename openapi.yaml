@@ -1,0 +1,408 @@
+openapi: 3.0.3
+
+info:
+  title: API MiniBlog
+  version: 1.0.0
+  description: API REST para gestionar autores y publicaciones.
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Authors
+    description: Operaciones sobre autores
+  - name: Posts
+    description: Operaciones sobre publicaciones
+
+paths:
+  /authors:
+    get:
+      tags: [Authors]
+      summary: Obtener todos los autores
+      responses:
+        '200':
+          description: Lista de autores obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Authors]
+      summary: Crear un autor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorInput'
+      responses:
+        '201':
+          description: Autor creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: El correo electrónico ya está registrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /authors/{id}:
+    parameters:
+      - $ref: '#/components/parameters/AuthorId'
+    get:
+      tags: [Authors]
+      summary: Obtener un autor por ID
+      responses:
+        '200':
+          description: Autor encontrado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Autor no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Authors]
+      summary: Actualizar un autor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorInput'
+      responses:
+        '200':
+          description: Autor actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Autor no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: El correo electrónico ya está registrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Authors]
+      summary: Eliminar un autor
+      description: No permite eliminar autores que tengan publicaciones asociadas.
+      responses:
+        '204':
+          description: Autor eliminado correctamente, sin cuerpo de respuesta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Autor no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: El autor tiene publicaciones asociadas y no puede eliminarse.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /posts:
+    get:
+      tags: [Posts]
+      summary: Obtener todas las publicaciones
+      responses:
+        '200':
+          description: Lista de publicaciones obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Posts]
+      summary: Crear una publicación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostInput'
+      responses:
+        '201':
+          description: Publicación creada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Autor asociado no encontrado, si la API devuelve este estado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /posts/author/{authorId}:
+    get:
+      tags: [Posts]
+      summary: Obtener publicaciones de un autor
+      description: Devuelve las publicaciones de un autor, con información del autor según la implementación de la API.
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          description: ID del autor.
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Publicaciones del autor obtenidas correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostWithAuthor'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Autor no encontrado, si la API devuelve este estado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /posts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PostId'
+    get:
+      tags: [Posts]
+      summary: Obtener una publicación por ID
+      responses:
+        '200':
+          description: Publicación encontrada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Publicación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Posts]
+      summary: Actualizar una publicación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostInput'
+      responses:
+        '200':
+          description: Publicación actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Publicación o autor no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Posts]
+      summary: Eliminar una publicación
+      responses:
+        '204':
+          description: Publicación eliminada correctamente, sin cuerpo de respuesta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Publicación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  parameters:
+    AuthorId:
+      name: id
+      in: path
+      required: true
+      description: ID del autor.
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    PostId:
+      name: id
+      in: path
+      required: true
+      description: ID de la publicación.
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  schemas:
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Ana García
+        email:
+          type: string
+          format: email
+          example: ana@example.com
+        bio:
+          type: string
+          nullable: true
+          example: Escritora de tecnología
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-11-20T15:30:00Z'
+    AuthorInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Lucía Fernández
+        email:
+          type: string
+          format: email
+          maxLength: 150
+          example: lucia.nueva@example.com
+        bio:
+          type: string
+          nullable: true
+          example: Aprendiendo desarrollo backend
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        author_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Mi primera publicación
+        content:
+          type: string
+          example: Este es el contenido de mi publicación.
+        published:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-11-20T15:30:00Z'
+    PostInput:
+      type: object
+      required: [author_id, title, content]
+      properties:
+        author_id:
+          type: integer
+          minimum: 1
+          example: 1
+        title:
+          type: string
+          maxLength: 200
+          example: Mi primera publicación
+        content:
+          type: string
+          example: Este es el contenido de mi publicación.
+        published:
+          type: boolean
+          default: false
+          example: true
+    PostWithAuthor:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+        - type: object
+          description: Los campos adicionales del autor dependen de la respuesta real de este endpoint.
+          additionalProperties: true
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Error interno del servidor
+
+  responses:
+    BadRequest:
+      description: Parámetro, cuerpo JSON o datos inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Error interno del servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
