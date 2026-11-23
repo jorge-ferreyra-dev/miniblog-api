@@ -86,7 +86,7 @@ router.post('/', async (req, res) => {
 // * PUT /authors/:id - actualizar autor
 router.put('/:id', async (req, res) => {
     const id = Number(req.params.id);
-    const { name, email, bio } = req.body;
+    const { name, email, bio } = req.body ?? {};
 
     if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
         return res.status(400).json({error: 'ID de autor inválido'});

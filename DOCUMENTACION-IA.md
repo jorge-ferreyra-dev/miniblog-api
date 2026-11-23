@@ -74,7 +74,6 @@ Decidí mantener una arquitectura sencilla, con las consultas SQL dentro de los 
 ![Respuesta 6](screenshot-IA/revision-authors/06-revision-authors.png)
 ![Respuesta 7](screenshot-IA/revision-authors/07-revision-authors.png)
 ![Respuesta 8](screenshot-IA/revision-authors/08-revision-authors.png)
-![Respuesta 9](screenshot-IA/revision-authors/09-revision-authors.png)
 
 ##  Revisión del módulo de publicaciones
 
