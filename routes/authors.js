@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/config');
+const { validateEmail } = require('../validators/authors.validator.js');
 
 // GET /authors - listar autores
 router.get('/', async (req, res) => {
@@ -37,6 +38,7 @@ router.get('/:id', async (req, res) => {
 
 //* POST /authors - crea autor
 router.post('/', async (req, res) => {
+
     const { name, email, bio } = req.body ?? {};
 
         if(!name || !email) {
@@ -51,17 +53,12 @@ router.post('/', async (req, res) => {
             return res.status(400).json({error: 'El nombre no puede superar los 100 caracteres'});
         }
 
-        if(typeof email !== 'string' || email.trim() === '') {
-            return res.status(400).json({error: 'El email debe ser un texto no vacio'});
-        }
+        const emailValidation = validateEmail(email);
 
-        if(email.length > 150) {
-            return res.status(400).json({error: 'El email no puede superar los 150 caracteres'});
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailRegex.test(email)) {
-            return res.status(400).json({error: 'El formato del email es inválido'});
+        if (!emailValidation.valid) {
+            return res.status(400).json({
+                error: emailValidation.error
+            });
         }
 
         if(bio != null && typeof bio !== 'string') {
@@ -104,17 +101,12 @@ router.put('/:id', async (req, res) => {
         return res.status(400).json({error: 'El nombre no puede superar los 100 caracteres'});
     }
 
-    if (typeof email !== 'string' || email.trim() === '') {
-        return res.status(400).json({error: 'El email debe ser un texto no vacío'});
-    }
+    const emailValidation = validateEmail(email);
 
-    if(email.length > 150) {
-        return res.status(400).json({error: 'El email no puede superar los 150 caracteres'});
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({error: 'El formato del email es inválido'});
+    if (!emailValidation.valid) {
+        return res.status(400).json({
+            error: emailValidation.error
+        });
     }
 
     if(bio != null && typeof bio !== 'string') {

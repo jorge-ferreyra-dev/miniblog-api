@@ -87,5 +87,21 @@ describe('Endpoints de autores', () => {
 
         expect(response.status).toBe(404);
     });
+
+    test('PUT /authors/:id devuelve 400 si el email es inválido', async () => {
+    const author = {
+        name: 'Autor de prueba',
+        email: 'anaexample.com',
+        bio: 'Autor temporal'
+    };
+
+    const response = await request(app)
+        .put('/authors/1')
+        .send(author);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('El formato del email es inválido');
+});
+
 });
 
