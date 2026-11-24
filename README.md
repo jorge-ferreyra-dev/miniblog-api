@@ -7,6 +7,7 @@ Desarrollada con Node.js, Express y PostgreSQL, y desplegada en Railway.
 ## Demo en producción
 
 - **[Probar la API desde Swagger UI](https://miniblog-api-production-a2d801da.up.railway.app/api-docs)**
+
 - **[API REST desplegada en Railway](https://miniblog-api-production-a2d801da.up.railway.app/)**
 
 La API permite consultar y probar sus endpoints directamente desde Swagger UI, sin necesidad de instalar el proyecto localmente.
@@ -16,11 +17,59 @@ Los endpoints utilizan las rutas `/authors` y `/posts` (sin prefijo `/api`).
 ## Tecnologías
 
 - **Backend:** Node.js 22 y Express
+
 - **Base de datos:** PostgreSQL
+
 - **Cliente de base de datos:** pg (node-postgres)
+
 - **Pruebas:** Vitest y Supertest
+
 - **Documentación:** OpenAPI 3.0 y Swagger UI
+
 - **Despliegue:** Railway
+
+## Arquitectura y estructura del proyecto
+
+La aplicación separa las responsabilidades en rutas, servicios, validadores y middlewares. Las rutas gestionan las solicitudes y respuestas HTTP; los servicios encapsulan las consultas SQL parametrizadas mediante el pool de PostgreSQL; los validadores comprueban los datos de entrada y los middlewares gestionan las rutas inexistentes y los errores globales.
+
+Principales archivos y carpetas:
+
+```text
+miniblog-api/
+├── app.js
+├── db/
+│   ├── config.js
+│   ├── setup.sql
+│   └── seed.sql
+├── routes/
+│   ├── authors.js
+│   └── posts.js
+├── services/
+│   ├── authors.service.js
+│   └── posts.service.js
+├── validators/
+│   ├── authors.validator.js
+│   ├── posts.validator.js
+│   └── common.validator.js
+├── middlewares/
+│   ├── error.middleware.js
+│   └── notFound.middleware.js
+├── tests/
+│   ├── app.test.js
+│   ├── authors.test.js
+│   ├── posts.test.js
+│   ├── authors.validator.test.js
+│   ├── posts.validator.test.js
+│   └── common.validator.test.js
+├── .env.example
+├── .gitignore
+├── openapi.yaml
+├── package.json
+├── README.md
+└── DOCUMENTACION-IA.md
+```
+
+`app.js` es el único punto de entrada de la aplicación. Configura Express, Swagger, las rutas y los middlewares. Mediante `require.main === module`, inicia el servidor únicamente cuando se ejecuta directamente, permitiendo importar la aplicación desde Supertest sin iniciar un servidor independiente.
 
 ## Endpoints
 
@@ -40,7 +89,7 @@ Los endpoints utilizan las rutas `/authors` y `/posts` (sin prefijo `/api`).
 | --- | --- | --- |
 | GET | `/posts` | Obtener todas las publicaciones |
 | GET | `/posts/:id` | Obtener una publicación por ID |
-| GET | `/posts/author/:authorId` | Obtener las publicaciones de un autor |
+| GET | `/posts/author/:author_id` | Obtener las publicaciones de un autor |
 | POST | `/posts` | Crear una publicación |
 | PUT | `/posts/:id` | Actualizar una publicación |
 | DELETE | `/posts/:id` | Eliminar una publicación |
@@ -55,7 +104,7 @@ Los siguientes comandos están pensados para Bash o Git Bash. Las respuestas son
 curl https://miniblog-api-production-a2d801da.up.railway.app/authors
 ```
 
-**Respuesta de ejemplo (`200 OK`):**
+**Respuesta de ejemplo (**`**200 OK**`**):**
 
 ```json
 [
@@ -75,7 +124,7 @@ curl https://miniblog-api-production-a2d801da.up.railway.app/authors
   },
   {
     "id": 3,
-    "name": "Marí­a Lopez",
+    "name": "María Lopez",
     "email": "maria@example.com",
     "bio": "Ingeniera de software con foco en APIs REST",
     "created_at": "2026-11-21T16:55:18.088Z"
@@ -89,7 +138,7 @@ curl https://miniblog-api-production-a2d801da.up.railway.app/authors
 curl https://miniblog-api-production-a2d801da.up.railway.app/authors/1
 ```
 
-**Respuesta de ejemplo (`200 OK`):**
+**Respuesta de ejemplo (**`**200 OK**`**):**
 
 ```json
 {
@@ -104,8 +153,8 @@ curl https://miniblog-api-production-a2d801da.up.railway.app/authors/1
 ### Crear un autor
 
 ```bash
-curl -i -X POST https://miniblog-api-production-a2d801da.up.railway.app/authors \
-  -H "Content-Type: application/json" \
+curl -i -X POST https://miniblog-api-production-a2d801da.up.railway.app/authors \\
+  -H "Content-Type: application/json" \\
   -d '{
     "name": "María Rodríguez",
     "email": "maria.rodriguez.ejemplo@example.com",
@@ -113,7 +162,7 @@ curl -i -X POST https://miniblog-api-production-a2d801da.up.railway.app/authors 
   }'
 ```
 
-**Respuesta de ejemplo (`201 Created`):**
+**Respuesta de ejemplo (**`**201 Created**`**):**
 
 ```json
 {
@@ -132,8 +181,8 @@ Si el correo ya está registrado, la API devuelve `409 Conflict`. Para repetir e
 El método `PUT` requiere enviar `name` y `email`, aunque solo se desee cambiar la biografía. Reemplazá el ID por el de un autor existente.
 
 ```bash
-curl -i -X PUT https://miniblog-api-production-a2d801da.up.railway.app/authors/4 \
-  -H "Content-Type: application/json" \
+curl -i -X PUT https://miniblog-api-production-a2d801da.up.railway.app/authors/4 \\
+  -H "Content-Type: application/json" \\
   -d '{
     "name": "María Rodríguez",
     "email": "maria.rodriguez.ejemplo@example.com",
@@ -141,7 +190,7 @@ curl -i -X PUT https://miniblog-api-production-a2d801da.up.railway.app/authors/4
   }'
 ```
 
-**Respuesta de ejemplo (`200 OK`):**
+**Respuesta de ejemplo (**`**200 OK**`**):**
 
 ```json
 {
@@ -166,8 +215,8 @@ curl -i -X DELETE https://miniblog-api-production-a2d801da.up.railway.app/author
 ### Crear una publicación
 
 ```bash
-curl -i -X POST https://miniblog-api-production-a2d801da.up.railway.app/posts \
-  -H "Content-Type: application/json" \
+curl -i -X POST https://miniblog-api-production-a2d801da.up.railway.app/posts \\
+  -H "Content-Type: application/json" \\
   -d '{
     "title": "Introducción a PostgreSQL",
     "content": "PostgreSQL es una base de datos relacional de código abierto...",
@@ -176,7 +225,7 @@ curl -i -X POST https://miniblog-api-production-a2d801da.up.railway.app/posts \
   }'
 ```
 
-**Respuesta de ejemplo (`201 Created`):**
+**Respuesta de ejemplo (**`**201 Created**`**):**
 
 ```json
 {
@@ -197,7 +246,7 @@ El valor de `author_id` debe corresponder a un autor existente.
 curl https://miniblog-api-production-a2d801da.up.railway.app/posts/author/1
 ```
 
-**Respuesta de ejemplo (`200 OK`):**
+**Respuesta de ejemplo (**`**200 OK**`**):**
 
 ```json
 [
@@ -235,7 +284,9 @@ Abrí http://localhost:3000/api-docs.
 ### Prerrequisitos
 
 - Node.js 22 (versión utilizada en el proyecto)
+
 - PostgreSQL 14 o superior
+
 - Git
 
 ### Pasos
@@ -283,9 +334,25 @@ Abrí http://localhost:3000/api-docs.
 
 La API estará disponible en http://localhost:3000.
 
+`npm run dev` ejecuta `app.js` en modo watch y carga las variables del archivo `.env`. El comando `npm start` ejecuta `node app.js` y utiliza las variables de entorno disponibles en el proceso, como las proporcionadas por Railway.
+
 ## Pruebas automatizadas
 
-El proyecto utiliza Vitest y Supertest para comprobar el comportamiento de los endpoints y sus respuestas HTTP.
+El proyecto utiliza Vitest para las pruebas unitarias y Vitest junto con Supertest para las pruebas de integración con Express y PostgreSQL real.
+
+La última ejecución local confirmada obtuvo **82 tests aprobados**: 67 unitarios y 15 de integración.
+
+| Archivo | Tipo | Tests |
+| --- | --- | ---: |
+| `common.validator.test.js` | Unitario | 10 |
+| `authors.validator.test.js` | Unitario | 30 |
+| `posts.validator.test.js` | Unitario | 27 |
+| `app.test.js` | Integración | 3 |
+| `authors.test.js` | Integración | 8 |
+| `posts.test.js` | Integración | 4 |
+| **Total** | | **82** |
+
+Las pruebas cubren validaciones de entrada, operaciones principales de creación, consulta, actualización y eliminación, persistencia de cambios, emails duplicados, integridad referencial, filtrado de publicaciones por autor y respuestas de error. No representan una cobertura exhaustiva de todos los escenarios posibles.
 
 Con PostgreSQL en funcionamiento y el archivo `.env` configurado, ejecutá:
 
@@ -293,19 +360,23 @@ Con PostgreSQL en funcionamiento y el archivo `.env` configurado, ejecutá:
 npm test
 ```
 
-Las pruebas utilizan datos temporales en la base de datos configurada. Ejecutalas contra una base local de desarrollo, no contra la base de producción.
+Las pruebas de integración utilizan datos temporales en la base de datos configurada, correos únicos generados con `randomUUID()` y bloques `finally` para limpiar los registros creados. Las publicaciones temporales se eliminan antes que sus autores para respetar las claves foráneas. Ejecutalas contra una base local de desarrollo, no contra la base de producción.
 
 ## Despliegue en Railway
 
 La API y PostgreSQL están desplegados como servicios de un proyecto de Railway.
 
 1. Conectar el repositorio de GitHub a Railway.
+
 2. Agregar un servicio PostgreSQL llamado `Postgres`.
+
 3. Configurar las variables de entorno del servicio de la API.
+
 4. Ejecutar `db/setup.sql` y `db/seed.sql` en la base PostgreSQL de Railway.
+
 5. Generar un dominio público para el servicio de la API.
 
-Railway inicia la aplicación mediante `npm start`. El servidor utiliza el puerto asignado por Railway a través de `process.env.PORT`.
+El servicio utiliza la detección automática del comando de inicio de Railway, sin un Start Command personalizado. El script `npm start` del proyecto ejecuta `node app.js`. El servidor utiliza el puerto asignado por Railway a través de `process.env.PORT`.
 
 ### Variables de entorno en Railway
 
@@ -330,11 +401,13 @@ Como ampliación opcional del proyecto, se plantea incorporar un sistema de come
 Las mejoras previstas son:
 
 - Crear una tabla `comments` en PostgreSQL, relacionada con autores y publicaciones mediante claves foráneas.
+
 - Implementar endpoints REST para crear y consultar comentarios.
+
 - Mantener la arquitectura actual del proyecto.
+
 - Garantizar la integridad referencial y definir el comportamiento de los comentarios cuando se eliminen autores o publicaciones.
+
 - Desplegar las nuevas funcionalidades en Railway.
 
 **Estado:** pendiente de implementación. Estas mejoras forman parte de los objetivos opcionales del proyecto.
-
-
