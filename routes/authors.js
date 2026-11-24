@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/config');
-const { validateEmail } = require('../validators/authors.validator.js');
+const { validateEmail, validateName, validateBio, validateRequiredFields } = require('../validators/authors.validator.js');
+const { validateId } = require('../validators/common.validator.js');
 
 // GET /authors - listar autores
 router.get('/', async (req, res) => {
@@ -18,9 +19,14 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const id = Number(req.params.id);
 
-    if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
-        return res.status(400).json({ error: 'ID de autor inválido' });
+    const idValidation = validateId(id, 'ID de autor inválido');
+
+    if (!idValidation.valid) {
+        return res.status(400).json({
+            error: idValidation.error
+        });
     }
+
     try {
         const result = await pool.query(
         'SELECT * FROM authors WHERE id = $1',
@@ -39,18 +45,22 @@ router.get('/:id', async (req, res) => {
 //* POST /authors - crea autor
 router.post('/', async (req, res) => {
 
-    const { name, email, bio } = req.body ?? {};
+        const { name, email, bio } = req.body ?? {};
 
-        if(!name || !email) {
-            return res.status(400).json({error: 'El nombre y el email son obligatorios'});
+        const requiredFieldsValidation = validateRequiredFields(name, email);
+
+        if (!requiredFieldsValidation.valid) {
+            return res.status(400).json({
+                error: requiredFieldsValidation.error
+            });
         }
 
-        if(typeof name !== 'string' || name.trim() === '') {
-            return res.status(400).json({error: 'El nombre debe ser un texto no vacio'});    
-        }
+        const nameValidation = validateName(name);
 
-        if(name.length > 100) {
-            return res.status(400).json({error: 'El nombre no puede superar los 100 caracteres'});
+        if(!nameValidation.valid) {
+            return res.status(400).json({
+                error: nameValidation.error
+            });
         }
 
         const emailValidation = validateEmail(email);
@@ -61,8 +71,12 @@ router.post('/', async (req, res) => {
             });
         }
 
-        if(bio != null && typeof bio !== 'string') {
-            return res.status(400).json({error: 'La biografia debe contener texto'});
+        const bioValidation = validateBio(bio);
+
+        if (!bioValidation.valid) {
+            return res.status(400).json({
+                error: bioValidation.error
+            });
         }
 
     try {
@@ -85,20 +99,28 @@ router.put('/:id', async (req, res) => {
     const id = Number(req.params.id);
     const { name, email, bio } = req.body ?? {};
 
-    if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
-        return res.status(400).json({error: 'ID de autor inválido'});
+    const idValidation = validateId(id, 'ID de autor inválido');
+
+    if (!idValidation.valid) {
+        return res.status(400).json({
+            error: idValidation.error
+        });
     }
 
-    if (!name || !email) {
-        return res.status(400).json({error: 'El nombre y el email son obligatorios'});
+    const requiredFieldsValidation = validateRequiredFields(name, email);
+
+    if (!requiredFieldsValidation.valid) {
+        return res.status(400).json({
+            error: requiredFieldsValidation.error
+        });
     }
 
-    if (typeof name !== 'string' || name.trim() === '') {
-        return res.status(400).json({error: 'El nombre debe ser un texto no vacío'});
-    }
+    const nameValidation = validateName(name);
 
-    if(name.length > 100) {
-        return res.status(400).json({error: 'El nombre no puede superar los 100 caracteres'});
+    if(!nameValidation.valid) {
+        return res.status(400).json({
+            error: nameValidation.error
+        });
     }
 
     const emailValidation = validateEmail(email);
@@ -109,8 +131,12 @@ router.put('/:id', async (req, res) => {
         });
     }
 
-    if(bio != null && typeof bio !== 'string') {
-        return res.status(400).json({error: 'La biografía debe contener texto'});
+    const bioValidation = validateBio(bio);
+
+    if (!bioValidation.valid) {
+        return res.status(400).json({
+            error: bioValidation.error
+        });
     }
 
     try {
@@ -135,8 +161,13 @@ router.put('/:id', async (req, res) => {
 // * DELETE /author/:id - eliminar un autor
 router.delete('/:id', async (req, res) => {
     const id = Number(req.params.id);
-    if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
-        return res.status(400).json({error: 'ID de autor inválido'});
+    
+    const idValidation = validateId(id, 'ID de autor inválido');
+
+    if (!idValidation.valid) {
+        return res.status(400).json({
+            error: idValidation.error
+        });
     }
 
     try {
