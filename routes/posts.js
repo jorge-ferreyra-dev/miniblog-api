@@ -1,8 +1,14 @@
+
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/config');
+
 const { validateId } = require('../validators/common.validator.js');
+
 const { validateRequiredFields, validateTitle, validateContent, validatePublished } = require('../validators/posts.validator.js');
+
+const { getAuthorById } = require('../services/authors.service.js');
+
+const { getPostsByAuthorId, getAllPosts, getPostById, createPost, updatePost, deletePost } = require('../services/posts.service.js');
 
 // GET /posts/author/:author_id - obtener posts de un autor determinado
 router.get('/author/:author_id', async (req, res) => {
@@ -17,32 +23,30 @@ router.get('/author/:author_id', async (req, res) => {
     }
 
     try {
-        const author = await pool.query(
-            'SELECT id FROM authors WHERE id = $1',
-            [authorId]
-        );
+        const author = await getAuthorById(authorId);
 
         if (author.rows.length === 0) {
-            return res.status(404).json({ error: 'Autor no encontrado' });
+            return res.status(404).json({
+                error: 'Autor no encontrado'
+            });
         }
 
-        const result = await pool.query(
-            'SELECT posts.*, authors.name AS author_name, authors.email AS author_email FROM posts JOIN authors ON posts.author_id = authors.id WHERE posts.author_id = $1',
-            [authorId]
-        );
+        const result = await getPostsByAuthorId(authorId);
 
         res.json(result.rows);
 
     } catch (error) {
         console.error('Error al obtener publicaciones del autor', error.message);
-        res.status(500).json({ error: 'Error al obtener publicaciones del autor' });
+        res.status(500).json({
+            error: 'Error al obtener publicaciones del autor'
+        });
     }
 });
 
 // GET /posts - listar posts
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM posts');
+        const result = await getAllPosts();
 
         res.json(result.rows);
 
@@ -65,13 +69,12 @@ router.get('/:id', async (req, res) => {
     }
 
     try {
-        const result = await pool.query(
-            'SELECT * FROM posts WHERE id = $1',
-            [id]
-        );
+        const result = await getPostById(id);
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Post no encontrada' });
+            return res.status(404).json({
+                error: 'Post no encontrada'
+            });
         }
 
         res.json(result.rows[0]);
@@ -127,9 +130,11 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const result = await pool.query(
-            'INSERT INTO posts (author_id, title, content, published) VALUES ($1, $2, $3, $4) RETURNING *',
-            [author_id, title.trim(), content.trim(), published ?? false]
+        const result = await createPost(
+            author_id,
+            title,
+            content,
+            published
         );
 
         res.status(201).json(result.rows[0]);
@@ -142,7 +147,9 @@ router.post('/', async (req, res) => {
         }
 
         console.error('Error al crear post', error.message);
-        res.status(500).json({ error: 'Error al crear publicación' });
+        res.status(500).json({
+            error: 'Error al crear publicación'
+        });
     }
 });
 
@@ -200,13 +207,18 @@ router.put('/:id', async (req, res) => {
     }
 
     try {
-        const result = await pool.query(
-            'UPDATE posts SET author_id = $1, title = $2, content = $3, published = $4 WHERE id = $5 RETURNING *',
-            [author_id, title.trim(), content.trim(), published ?? false, id]
+        const result = await updatePost(
+            id,
+            author_id,
+            title,
+            content,
+            published
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Post no encontrada' });
+            return res.status(404).json({
+                error: 'Post no encontrada'
+            });
         }
 
         res.status(200).json(result.rows[0]);
@@ -219,7 +231,9 @@ router.put('/:id', async (req, res) => {
         }
 
         console.error('Error al actualizar post', error.message);
-        res.status(500).json({ error: 'Error al actualizar post' });
+        res.status(500).json({
+            error: 'Error al actualizar post'
+        });
     }
 });
 
@@ -236,20 +250,21 @@ router.delete('/:id', async (req, res) => {
     }
 
     try {
-        const result = await pool.query(
-            'DELETE FROM posts WHERE id = $1',
-            [id]
-        );
+        const result = await deletePost(id);
 
         if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Post no encontrada' });
+            return res.status(404).json({
+                error: 'Post no encontrada'
+            });
         }
 
         res.status(204).send();
 
     } catch (error) {
         console.error('Error al eliminar post', error.message);
-        res.status(500).json({ error: 'Error al eliminar post' });
+        res.status(500).json({
+            error: 'Error al eliminar post'
+        });
     }
 });
 
