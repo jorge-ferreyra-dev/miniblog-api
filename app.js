@@ -6,6 +6,8 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require('yaml');
 const fs = require('node:fs');
 const path = require('node:path');
+const { notFound } = require('./middlewares/notFound.middleware.js');
+const { errorHandler } = require('./middlewares/error.middleware.js');
 
 const openapiPath = path.join(__dirname, 'openapi.yaml');
 const openapiDocument = YAML.parse(
@@ -24,23 +26,9 @@ app.use('/authors', authorsRoutes);
 app.use('/posts', postsRoutes);
 
 // Middleware para rutas inexistentes
-app.use((req, res) => {
-    res.status(404).json({error: 'Ruta no encontrada'});
-});
+app.use(notFound);
 
 // Middleware de manejo de errores
-app.use((err, req, res, next) => {
-    console.error('Error:', err.message);
-
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        return res.status(400).json({
-            error: 'El cuerpo de la solicitud contiene un JSON inválido'
-        });
-    }
-
-    res.status(500).json({
-        error: 'Error interno del servidor'
-    });
-});
+app.use(errorHandler);
 
 module.exports = app;
