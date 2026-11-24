@@ -4,9 +4,12 @@ API REST para gestionar autores y publicaciones de un miniblog. Permite realizar
 
 Desarrollada con Node.js, Express y PostgreSQL, y desplegada en Railway.
 
-## URL base
+## Demo en producción
 
-**API en producción:** https://miniblog-api-production-a2d801da.up.railway.app/
+- **[Probar la API desde Swagger UI](https://miniblog-api-production-a2d801da.up.railway.app/api-docs)**
+- **[API REST desplegada en Railway](https://miniblog-api-production-a2d801da.up.railway.app/)**
+
+La API permite consultar y probar sus endpoints directamente desde Swagger UI, sin necesidad de instalar el proyecto localmente.
 
 Los endpoints utilizan las rutas `/authors` y `/posts` (sin prefijo `/api`).
 
@@ -69,7 +72,7 @@ curl https://miniblog-api-production-a2d801da.up.railway.app/authors
     "email": "carlos@example.com",
     "bio": "Escritor técnico especializado en bases de datos",
     "created_at": "2026-11-21T16:55:18.088Z"
-  }
+  },
   {
     "id": 3,
     "name": "Marí­a Lopez",
