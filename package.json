@@ -2,10 +2,10 @@
   "name": "proyectom2_jorgeferreyra",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch --env-file=.env server.js",
+    "start": "node app.js",
+    "dev": "node --watch --env-file=.env app.js",
     "test": "node --env-file=.env ./node_modules/vitest/vitest.mjs run"
   },
   "keywords": [],
