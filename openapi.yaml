@@ -171,7 +171,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
-          description: Autor asociado no encontrado, si la API devuelve este estado.
+          description: Datos inválidos o autor asociado inexistente.
           content:
             application/json:
               schema:
@@ -205,7 +205,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
-          description: Autor no encontrado, si la API devuelve este estado.
+          description: Autor no encontrado.
           content:
             application/json:
               schema:
@@ -253,9 +253,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Post'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Datos inválidos o autor asociado inexistente.
+          content:
+            application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
         '404':
-          description: Publicación o autor no encontrado.
+          description: Publicación no encontrada.
           content:
             application/json:
               schema:
@@ -384,8 +388,14 @@ components:
       allOf:
         - $ref: '#/components/schemas/Post'
         - type: object
-          description: Los campos adicionales del autor dependen de la respuesta real de este endpoint.
-          additionalProperties: true
+          properties:
+            author_name:
+              type: string
+              example: Ana García
+            author_email:
+              type: string
+              format: email
+              example: ana@example.com
     Error:
       type: object
       properties:

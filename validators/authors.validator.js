@@ -1,5 +1,3 @@
-const { error } = require("node:console");
-
 function validateEmail(email) {
 
     if (typeof email !== 'string' || email.trim() === '') {
