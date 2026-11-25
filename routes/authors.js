@@ -199,9 +199,15 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar autor', error.message);
 
-        if (error.code === '23503') {
+        if (error.code === '23503' && error.constraint === 'posts_author_id_fkey') {
             return res.status(409).json({
                 error: 'No se puede eliminar un autor con publicaciones asociadas'
+            });
+        }
+
+        if (error.code === '23503' && error.constraint === 'comments_author_id_fkey') {
+            return res.status(409).json({
+                error: 'No se puede eliminar un autor con comentarios asociados'
             });
         }
 
