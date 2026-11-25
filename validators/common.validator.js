@@ -14,4 +14,18 @@ function validateId(id, errorMessage) {
 
 }
 
-module.exports = { validateId };
+function validateContent(content) {
+    if (typeof content !== 'string' || content.trim() === '') {
+        return {
+            valid: false,
+            error: 'El contenido debe ser un texto no vacío'
+        };
+    }
+
+    return {
+        valid: true,
+        error: null
+    };
+}
+
+module.exports = { validateId, validateContent };

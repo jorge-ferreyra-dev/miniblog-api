@@ -34,20 +34,6 @@ function validateTitle(title) {
     };
 }
 
-function validateContent(content) {
-    if (typeof content !== 'string' || content.trim() === '') {
-        return {
-            valid: false,
-            error: 'El contenido debe ser un texto no vacío'
-        };
-    }
-
-    return {
-        valid: true,
-        error: null
-    };
-}
-
 function validatePublished(published) {
     if (published !== undefined && typeof published !== 'boolean') {
         return {
@@ -65,6 +51,5 @@ function validatePublished(published) {
 module.exports = {
     validateRequiredFields,
     validateTitle,
-    validateContent,
     validatePublished
 };
