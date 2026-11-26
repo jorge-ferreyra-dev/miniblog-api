@@ -2,9 +2,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { validateId } = require('../validators/common.validator.js');
+const { validateId, validateContent } = require('../validators/common.validator.js');
 
-const { validateRequiredFields, validateTitle, validateContent, validatePublished } = require('../validators/posts.validator.js');
+const { validateRequiredFields, validateTitle, validatePublished } = require('../validators/posts.validator.js');
 
 const { getAuthorById } = require('../services/authors.service.js');
 

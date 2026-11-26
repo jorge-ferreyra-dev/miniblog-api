@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const authorsRoutes = require('./routes/authors');
 const postsRoutes = require('./routes/posts');
+const commentsRoutes = require('./routes/comments.js');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yaml');
 const fs = require('node:fs');
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 
 app.use('/authors', authorsRoutes);
 app.use('/posts', postsRoutes);
+app.use('/comments', commentsRoutes);
 
 // Middleware para rutas inexistentes
 app.use(notFound);

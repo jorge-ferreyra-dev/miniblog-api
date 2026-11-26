@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { validateId } from '../validators/common.validator.js';
+import { validateId, validateContent } from '../validators/common.validator.js';
 
 describe('validateId', () => {
     test('Comprobar con ID válido', () => {
@@ -74,5 +74,48 @@ describe('validateId', () => {
     
 });
 
+describe('validateContent', () => {
+    test('Comprobar con contenido válido', () => {
+        expect(validateContent('Contenido de mi publicación')).toEqual({
+            valid: true,
+            error: null
+        });
+    });
+
+    test('Comprobar con contenido numérico', () => {
+        expect(validateContent(123)).toEqual({
+            valid: false,
+            error: 'El contenido debe ser un texto no vacío'
+        });
+    });
+
+    test('Comprobar con contenido vacío', () => {
+        expect(validateContent('')).toEqual({
+            valid: false,
+            error: 'El contenido debe ser un texto no vacío'
+        });
+    });
+
+    test('Comprobar con contenido de espacios', () => {
+        expect(validateContent('   ')).toEqual({
+            valid: false,
+            error: 'El contenido debe ser un texto no vacío'
+        });
+    });
+
+    test('Comprobar con contenido null', () => {
+        expect(validateContent(null)).toEqual({
+            valid: false,
+            error: 'El contenido debe ser un texto no vacío'
+        });
+    });
+
+    test('Comprobar con contenido undefined', () => {
+        expect(validateContent(undefined)).toEqual({
+            valid: false,
+            error: 'El contenido debe ser un texto no vacío'
+        });
+    });
+});
 
 
