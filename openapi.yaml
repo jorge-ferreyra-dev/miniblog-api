@@ -2,8 +2,8 @@ openapi: 3.0.3
 
 info:
   title: API MiniBlog
-  version: 1.0.0
-  description: API REST para gestionar autores y publicaciones.
+  version: 1.1.0
+  description: API REST para gestionar autores, publicaciones y comentarios.
 
 servers:
   - url: /
@@ -14,6 +14,8 @@ tags:
     description: Operaciones sobre autores
   - name: Posts
     description: Operaciones sobre publicaciones
+  - name: Comments
+    description: Operaciones sobre comentarios
 
 paths:
   /authors:
@@ -116,7 +118,7 @@ paths:
     delete:
       tags: [Authors]
       summary: Eliminar un autor
-      description: No permite eliminar autores que tengan publicaciones asociadas.
+      description: No permite eliminar autores que tengan publicaciones o comentarios asociados.
       responses:
         '204':
           description: Autor eliminado correctamente, sin cuerpo de respuesta.
@@ -129,7 +131,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '409':
-          description: El autor tiene publicaciones asociadas y no puede eliminarse.
+          description: El autor tiene publicaciones o comentarios asociados y no puede eliminarse.
           content:
             application/json:
               schema:
@@ -169,8 +171,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Post'
         '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
           description: Datos inválidos o autor asociado inexistente.
           content:
             application/json:
@@ -269,9 +269,86 @@ paths:
     delete:
       tags: [Posts]
       summary: Eliminar una publicación
+      description: Elimina la publicación y todos sus comentarios asociados mediante ON DELETE CASCADE.
       responses:
         '204':
           description: Publicación eliminada correctamente, sin cuerpo de respuesta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Publicación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /comments:
+    get:
+      tags: [Comments]
+      summary: Obtener todos los comentarios
+      description: Devuelve los comentarios con el nombre del autor y el título de la publicación.
+      responses:
+        '200':
+          description: Lista de comentarios obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentWithDetails'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Comments]
+      summary: Crear un comentario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+      responses:
+        '201':
+          description: Comentario creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Datos inválidos, publicación o autor inexistente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /comments/post/{post_id}:
+    get:
+      tags: [Comments]
+      summary: Obtener comentarios de una publicación
+      description: Devuelve los comentarios de una publicación existente. Si no tiene comentarios, devuelve un array vacío.
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          description: ID de la publicación.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+          example: 1
+      responses:
+        '200':
+          description: Comentarios de la publicación obtenidos correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentWithDetails'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -396,6 +473,57 @@ components:
               type: string
               format: email
               example: ana@example.com
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        post_id:
+          type: integer
+          example: 1
+        author_id:
+          type: integer
+          example: 2
+        content:
+          type: string
+          example: Excelente publicación
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-11-25T15:30:00Z'
+
+    CommentInput:
+      type: object
+      required: [post_id, author_id, content]
+      properties:
+        post_id:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          example: 1
+        author_id:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          example: 2
+        content:
+          type: string
+          minLength: 1
+          description: Texto no vacío ni compuesto únicamente por espacios en blanco.
+          example: Excelente publicación
+
+    CommentWithDetails:
+      allOf:
+        - $ref: '#/components/schemas/Comment'
+        - type: object
+          properties:
+            author_name:
+              type: string
+              example: María López
+            post_title:
+              type: string
+              example: Mi primera publicación
     Error:
       type: object
       properties:
