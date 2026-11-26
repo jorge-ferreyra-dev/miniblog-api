@@ -237,12 +237,44 @@ También recomendó verificar más propiedades de las respuestas HTTP y mejorar 
 
 Las pruebas cubren los casos principales previstos, aunque no representan una cobertura exhaustiva de todos los escenarios posibles.
 
+## Implementación del sistema de comentarios (Extra Credit)
+
+**Objetivo:** ampliar la API incorporando una nueva entidad de comentarios, manteniendo la arquitectura existente y garantizando la integridad referencial.
+
+**Consulta realizada:** compartí los requisitos del Extra Credit con ChatGPT y solicité orientación para planificar su implementación de manera incremental, sin afectar la versión estable del proyecto.
+
+**Respuesta de la IA:** ChatGPT proporcionó orientación sobre el diseño de la tabla de comentarios, las relaciones entre entidades, la organización de los servicios, rutas y validadores, y la estrategia de migración de la base de datos. También proporcionó implementaciones de pruebas automatizadas y actualizaciones de la documentación OpenAPI y del README.
+
+**Decisiones técnicas:**
+
+- Conservé la versión estable del proyecto mediante la etiqueta `v1.0.0`.
+- Utilicé la rama `feature/comments` para desarrollar la nueva funcionalidad de manera independiente.
+- Incorporé una migración SQL para ampliar la base de datos existente sin eliminar los registros anteriores.
+- Utilicé `ON DELETE CASCADE` para eliminar los comentarios asociados a una publicación eliminada.
+- Utilicé `ON DELETE RESTRICT` para impedir la eliminación de autores con comentarios asociados.
+- Reutilicé las validaciones comunes para evitar duplicación de código.
+- Implementé únicamente los endpoints de creación y consulta de comentarios solicitados en la consigna.
+- Incorporé pruebas unitarias y de integración para verificar el funcionamiento de la nueva entidad.
+- Integré los cambios en la rama `main` mediante un Pull Request.
+
+Durante el despliegue también utilicé ChatGPT como apoyo para interpretar errores, revisar comandos de Git y PostgreSQL, ejecutar la migración y verificar el funcionamiento de la API en Railway.
+
+**Resultado:** ejecuté las pruebas automatizadas en mi entorno local y confirmé que los 97 tests pasaron correctamente.
+
+| Tipo de prueba | Cantidad |
+| --- | ---: |
+| Unitarias de validadores | 76 |
+| Integración de la aplicación | 3 |
+| Integración de autores | 8 |
+| Integración de publicaciones | 4 |
+| Integración de comentarios | 6 |
+| **Total** | **97** |
+
+Finalmente, actualicé el proyecto a la versión `1.1.0`, realicé la migración de la base de datos en Railway y comprobé el funcionamiento de los nuevos endpoints y de Swagger UI en producción.
+
 ## Reflexión final sobre el uso de IA
 
 El uso de ChatGPT evolucionó durante el proyecto. Inicialmente lo utilicé principalmente como tutor y revisor de mis implementaciones. En la etapa final también solicité código completo para determinadas refactorizaciones, pruebas y actualizaciones de documentación.
 
 Incorporé los cambios en mi entorno, ejecuté las pruebas y comprobé el funcionamiento de la aplicación. La IA sirvió como apoyo técnico y de aprendizaje, mientras que la integración y verificación de los cambios quedaron bajo mi responsabilidad.
-
-
-
 
